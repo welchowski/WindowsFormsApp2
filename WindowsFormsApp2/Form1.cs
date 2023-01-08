@@ -12,7 +12,14 @@ namespace WindowsFormsApp2
     {
         public Form1()
         {
+         
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            
+
         }
 
         class Point
@@ -61,9 +68,9 @@ namespace WindowsFormsApp2
                 A = a;
                 B = b;
                 C = c;
-                lineA= new Line();
-                lineB=new Line();
-                lineC=  new Line();
+                lineA = new Line();
+                lineB = new Line();
+                lineC = new Line();
 
                 lineA.P1 = a;
                 lineA.P2 = b;
@@ -73,6 +80,7 @@ namespace WindowsFormsApp2
 
                 lineC.P1 = c;
                 lineC.P2 = a;
+                pen = new Pen(Color.Magenta);
 
             }
 
@@ -174,16 +182,12 @@ namespace WindowsFormsApp2
             }
 
 
-            void writeCrossedTriangels(Triangle triangle)
-            {
-                if (!(crossed.Contains(triangle)) && triangle.crossed == true) { crossed.Add(triangle); }
 
-            }
 
             void writeNotCrossedTriangels(Triangle triangle)
             {
-                if (triangle.crossed) { NOTcrossed.Add(triangle); }
-                NOTcrossed.Add(triangle);
+                if (triangle.crossed == false) { NOTcrossed.Add(triangle); }
+
             }
 
             void writeNotCrossedTriangelsToFILE()
@@ -234,7 +238,7 @@ namespace WindowsFormsApp2
 
 
 
-          bool  calculatecrosedline(Line line1, Line line2)
+            bool calculatecrosedline(Line line1, Line line2)
             {
 
                 float x1 = line1.P1.X, x2 = line1.P2.X, x3 = line2.P1.X, x4 = line2.P2.X;
@@ -247,18 +251,32 @@ namespace WindowsFormsApp2
                 if (d == 0)
                 {
                     //Trace.WriteLine("D=" + d);
-                     Trace.WriteLine("NOT_CROSED");
-                    return  false;
-                    
+                    //  Trace.WriteLine("NOT_CROSED");
+                    return false;
+
                 }
 
-                else
-                {
-                    //Trace.WriteLine("D=" + d);
-                     Trace.WriteLine("CROSED");
-                    return  true;
-                    
-                }
+                // Get the x and y
+                float pre = (x1 * y2 - y1 * x2), post = (x3 * y4 - y3 * x4);
+                float x = (pre * (x3 - x4) - (x1 - x2) * post) / d;
+                float y = (pre * (y3 - y4) - (y1 - y2) * post) / d;
+
+                // Check if the x and y coordinates are within both lines
+                if (x < Math.Min(x1, x2) || x > Math.Max(x1, x2) ||
+                x < Math.Min(x3, x4) || x > Math.Max(x3, x4)) {// Trace.WriteLine("NOT_CROSED");
+                    return false; }
+
+                if (y < Math.Min(y1, y2) || y > Math.Max(y1, y2) ||
+                y < Math.Min(y3, y4) || y > Math.Max(y3, y4)) {// Trace.WriteLine("NOT_CROSED");
+                    return false; }
+
+
+
+                //Trace.WriteLine("D=" + d);
+                // Trace.WriteLine("CROSED");
+                return true;
+
+
 
             }
 
@@ -271,51 +289,57 @@ namespace WindowsFormsApp2
 
 
 
-          //  List<Line> lines2triangls = new List<Line>() { line1,line2,line3,line4,line5,line6,};
-           
+            //  List<Line> lines2triangls = new List<Line>() { line1,line2,line3,line4,line5,line6,};
+
             //checking if the triangles are crossed
             bool intersection(Triangle triangle1, Triangle triangle2)
             {
-                
 
 
 
 
 
-                if (calculatecrosedline(triangle1.lineA, triangle2.lineA)==false||
-                    calculatecrosedline(triangle1.lineA, triangle2.lineB) == false ||
-                    calculatecrosedline(triangle1.lineA, triangle2.lineC) == false ||
-                    calculatecrosedline(triangle1.lineB, triangle2.lineB) == false ||
-                    calculatecrosedline(triangle1.lineB, triangle2.lineC) == false ||
-                    calculatecrosedline(triangle1.lineC, triangle2.lineB) == false ||
-                    calculatecrosedline(triangle1.lineC, triangle2.lineC) == false  )
+
+                if (calculatecrosedline(triangle1.lineA, triangle2.lineA) == true ||
+                    calculatecrosedline(triangle1.lineA, triangle2.lineB) == true ||
+                    calculatecrosedline(triangle1.lineA, triangle2.lineC) == true ||
+                    calculatecrosedline(triangle1.lineB, triangle2.lineB) == true ||
+                    calculatecrosedline(triangle1.lineB, triangle2.lineC) == true ||
+                    calculatecrosedline(triangle1.lineC, triangle2.lineC) == true)
                 {
-                    triangle2.pen = blackPen;
-                    triangle2.crossed = false;
-                   // triangle2.pen = blackPen;
-                   // triangle2.crossed = false;
+                    Trace.WriteLine("CROSED");
+                    //triangle2.pen = greenPen;
+                    triangle1.pen = greenPen;
 
-                    writeNotCrossedTriangels(triangle2);
-                   // Trace.WriteLine("NOT_CROSED");
+
+                    // triangle2.crossed = true;
+                    triangle1.crossed = true;
+                    //   writeCrossedTriangels(triangle1);
+                    return true;
+
+                }
+
+                else
+                {
+
+                    //  triangle2.pen = blackPen;
+                    //  triangle2.crossed = false;
+                    triangle1.pen = blackPen;
+                    triangle1.crossed = false;
+
+                    // writeNotCrossedTriangels(triangle2);
+                    Trace.WriteLine("NOT_CROSED");
                     return false;
 
-                }
 
-                else {
-                   // Trace.WriteLine("CROSED");
-                    triangle2.pen = greenPen;
-                  //  triangle2.pen = greenPen;
 
-                    writeCrossedTriangels(triangle1);
-                    triangle2.crossed = true;
-                  //  triangle2.crossed = true;
-                    return true;
+
                 }
 
 
 
-                
-            } 
+
+            }
 
 
             // Construction of all possible obtuse triangles except triangles with the same vertices     
@@ -341,17 +365,6 @@ namespace WindowsFormsApp2
                     }
                 }
             }
-            int count = 0;
-            foreach (Triangle t in obtuseTriangles)
-            {
-                t.pen = new Pen(Color.Yellow);
-                foreach (Triangle t2 in obtuseTriangles)
-                {
-                    count++;
-                    Trace.WriteLine(count);
-                    intersection(t, t2);
-                }
-            }
 
             // Draw the triangles on the screen
             foreach (Triangle t in obtuseTriangles)
@@ -367,9 +380,154 @@ namespace WindowsFormsApp2
                 e.Graphics.DrawLine(t.pen, (float)t.C.X, (float)t.C.Y, (float)t.A.X, (float)t.A.Y);
             }
 
+
+
+            Triangle t1;
+
+            Triangle t2;
+
+            int counterOfobtuseTriangles = obtuseTriangles.Count;
+
+
+            int count = 0;
+
+
+            for (int i = 0; i < counterOfobtuseTriangles; i++)
+            {
+                t1 = obtuseTriangles[i];
+
+                for (int j = 0; j < counterOfobtuseTriangles; j++)
+                {
+                    // == counterOfobtuseTriangles ? j - 1 : j;
+
+
+                    if (j != i)
+                    {
+
+
+
+                        t2 = obtuseTriangles[j];
+                        Trace.WriteLine(" i= " + i + " j= " + j);
+
+
+                    }
+
+
+                    else
+                    {
+                        if (countertuptriangls == 1) {
+                            break;
+                        }
+
+                        if (i == 0 && j == i)
+                        {
+                            //  t1 = obtuseTriangles[1];
+                            t2 = obtuseTriangles[1];
+
+                            Trace.WriteLine(" i= " + i + " j= " + 1);
+                        }
+
+                        else if (j == i)
+                        {
+                            if (j + 1 != counterOfobtuseTriangles)
+                            {
+                                t2 = obtuseTriangles[j + 1];
+
+                                Trace.WriteLine(" i= " + i + " j= " + j + 1);
+                            }
+                            else
+                            {
+                                t2 = obtuseTriangles[j - 1];
+
+                                Trace.WriteLine(" i= " + i + " j= " + (j - 1));
+                            }
+
+                        }
+                        else {
+                            t2 = obtuseTriangles[j];
+                            Trace.WriteLine(" i= " + i + " j= " + j);
+                        }
+                    }
+
+
+
+
+                    count++;
+                    Trace.WriteLine(count);
+                    if (intersection(t1, t2)) { break; }
+
+
+
+
+
+
+
+
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //foreach (Triangle t in obtuseTriangles)
+            //{
+            //    List<Triangle> obtuseTriangles2 = new List<Triangle>(obtuseTriangles);
+
+            //    t.pen = new Pen(Color.Yellow);
+            //    foreach (Triangle t2 in obtuseTriangles)
+            //    {
+            //        count++;
+            //        Trace.WriteLine(count);
+            //        intersection(t, t2);
+            //    }
+            //}
+
+            foreach (Triangle t in obtuseTriangles)
+            {
+                //Draw points
+                t.A.Draw_Point(sender, e);
+                t.B.Draw_Point(sender, e);
+                t.C.Draw_Point(sender, e);
+
+                // Draw the lines between the points
+                e.Graphics.DrawLine(t.pen, (float)t.A.X, (float)t.A.Y, (float)t.B.X, (float)t.B.Y);
+                e.Graphics.DrawLine(t.pen, (float)t.B.X, (float)t.B.Y, (float)t.C.X, (float)t.C.Y);
+                e.Graphics.DrawLine(t.pen, (float)t.C.X, (float)t.C.Y, (float)t.A.X, (float)t.A.Y);
+            }
+
+            foreach (Triangle t in obtuseTriangles)
+            {
+                
+
+                    if (t.crossed)
+                    {
+
+                        crossed.Add(t);
+                    }
+                    else
+                    {
+                        NOTcrossed.Add(t);
+                    }
+
+                
+            }
+
             writeCrossedTriangelstoFile();
             writeNotCrossedTriangelsToFILE();
             Trace.WriteLine("END program");
         }
+
+       
     }
 }
