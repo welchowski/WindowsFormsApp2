@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp2
@@ -12,13 +14,13 @@ namespace WindowsFormsApp2
     {
         public Form1()
         {
-         
+
             InitializeComponent();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
 
         }
 
@@ -143,6 +145,8 @@ namespace WindowsFormsApp2
             List<Triangle> crossed = new List<Triangle>();
             List<Triangle> NOTcrossed = new List<Triangle>();
             List<Triangle> obtuseTriangles = new List<Triangle>();
+            List<Point> noDupes =new List<Point>();
+            noDupes = points;
 
             Pen blackPen = new Pen(Color.Black);
             Pen greenPen = new Pen(Color.Green);
@@ -161,25 +165,52 @@ namespace WindowsFormsApp2
                     points.Add(new Point(x, y));
 
                 }
+               
             }
+
+          
 
             void writeUsedpoints(Point point1, Point point2, Point point3)
             {
+               
+
                 usedPointss.Add(point1);
                 usedPointss.Add(point2);
                 usedPointss.Add(point3);
 
             }
 
-            bool isUsedPoint(Point point1, Point point2, Point point3)
+            bool isUsedPoint(Point point)
             {
 
-                if (usedPointss.Contains(point1) || usedPointss.Contains(point2) || usedPointss.Contains(point3))
+
+                for (int i = 0; i < usedPointss.Count(); i++)
                 {
-                    return true;
+                    
+
+                        if (point.X == usedPointss[i].X && point.Y == usedPointss[i].Y)
+                        {
+
+                            return true;
+
+
+
+                        }
+
+
+
+                    
                 }
+
+
+
+               
+
+               // Trace.WriteLine(" false used point OR" + " 1 x" + point1.X + " y " + point1.Y + " 2 x" + point2.X + " y " + point2.Y + " 3 x" + point3.X + " y " + point3.Y);
                 return false;
+                
             }
+
 
 
 
@@ -263,12 +294,16 @@ namespace WindowsFormsApp2
 
                 // Check if the x and y coordinates are within both lines
                 if (x < Math.Min(x1, x2) || x > Math.Max(x1, x2) ||
-                x < Math.Min(x3, x4) || x > Math.Max(x3, x4)) {// Trace.WriteLine("NOT_CROSED");
-                    return false; }
+                x < Math.Min(x3, x4) || x > Math.Max(x3, x4))
+                {// Trace.WriteLine("NOT_CROSED");
+                    return false;
+                }
 
                 if (y < Math.Min(y1, y2) || y > Math.Max(y1, y2) ||
-                y < Math.Min(y3, y4) || y > Math.Max(y3, y4)) {// Trace.WriteLine("NOT_CROSED");
-                    return false; }
+                y < Math.Min(y3, y4) || y > Math.Max(y3, y4))
+                {// Trace.WriteLine("NOT_CROSED");
+                    return false;
+                }
 
 
 
@@ -281,24 +316,11 @@ namespace WindowsFormsApp2
             }
 
 
-
-
-
-
-
-
-
-
             //  List<Line> lines2triangls = new List<Line>() { line1,line2,line3,line4,line5,line6,};
 
             //checking if the triangles are crossed
             bool intersection(Triangle triangle1, Triangle triangle2)
             {
-
-
-
-
-
 
                 if (calculatecrosedline(triangle1.lineA, triangle2.lineA) == true ||
                     calculatecrosedline(triangle1.lineA, triangle2.lineB) == true ||
@@ -331,38 +353,71 @@ namespace WindowsFormsApp2
                     Trace.WriteLine("NOT_CROSED");
                     return false;
 
-
-
-
                 }
-
-
-
-
             }
 
 
             // Construction of all possible obtuse triangles except triangles with the same vertices     
+            Triangle t__;
+            int connn = 0;
 
-            for (int i = 0; i < points.Count - 2; i++)
+
+        
+
+
+            for (int i = 0; i < noDupes.Count(); i++)
             {
-                for (int j = i + 1; j < points.Count - 1; j++)
+                for (int j = 1; j < noDupes.Count(); j++)
                 {
-                    for (int k = j + 1; k < points.Count; k++)
-                    {
-                        Triangle t = new Triangle(points[i], points[j], points[k]);
-                        if (t.checkIsTupokutnyi(t))
-                        {
-                            countertuptriangls++;
 
-                            if (isUsedPoint(points[i], points[j], points[k])) { break; }
+                    if (points[i].X == noDupes[j].X && points[i].Y == noDupes[j].Y) {
 
-                            obtuseTriangles.Add(t);
+                        noDupes.RemoveAt(i);
+                        
 
-                            writeUsedpoints(points[i], points[j], points[k]);
 
-                        }
                     }
+
+
+
+                }
+            }
+
+
+
+
+
+            for (int i = 0; i < noDupes.Count - 2; i++)
+            {
+               
+
+                for (int j = i + 1; j < noDupes.Count - 1; j++)
+                {
+                    
+
+
+                    for (int k = j + 1; k < noDupes.Count; k++)
+                    {
+
+                       
+                        t__ = new Triangle(noDupes[i], noDupes[j], noDupes[k]);
+
+                        if (isUsedPoint(t__.A)|| isUsedPoint(t__.B) || isUsedPoint(t__.C) ) { break; }
+                        countertuptriangls++;
+
+                           
+
+                            Trace.WriteLine("triangle " + connn);
+                        writeUsedpoints(noDupes[i], noDupes[j], noDupes[k]);
+                        obtuseTriangles.Add(t__);
+                            connn++;
+
+                        // Trace.WriteLine("writed used points");
+
+                        
+                        
+                    }
+
                 }
             }
 
@@ -381,14 +436,10 @@ namespace WindowsFormsApp2
             }
 
 
-
             Triangle t1;
-
             Triangle t2;
 
             int counterOfobtuseTriangles = obtuseTriangles.Count;
-
-
             int count = 0;
 
 
@@ -397,25 +448,19 @@ namespace WindowsFormsApp2
                 t1 = obtuseTriangles[i];
 
                 for (int j = 0; j < counterOfobtuseTriangles; j++)
-                {
-                    // == counterOfobtuseTriangles ? j - 1 : j;
-
-
+                {                
                     if (j != i)
                     {
-
-
-
                         t2 = obtuseTriangles[j];
                         Trace.WriteLine(" i= " + i + " j= " + j);
-
 
                     }
 
 
                     else
                     {
-                        if (countertuptriangls == 1) {
+                        if (countertuptriangls == 1)
+                        {
                             break;
                         }
 
@@ -435,6 +480,7 @@ namespace WindowsFormsApp2
 
                                 Trace.WriteLine(" i= " + i + " j= " + j + 1);
                             }
+
                             else
                             {
                                 t2 = obtuseTriangles[j - 1];
@@ -443,56 +489,22 @@ namespace WindowsFormsApp2
                             }
 
                         }
-                        else {
+
+                        else
+                        {
                             t2 = obtuseTriangles[j];
                             Trace.WriteLine(" i= " + i + " j= " + j);
                         }
                     }
 
-
-
-
                     count++;
                     Trace.WriteLine(count);
                     if (intersection(t1, t2)) { break; }
-
-
-
-
-
-
-
-
                 }
 
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //foreach (Triangle t in obtuseTriangles)
-            //{
-            //    List<Triangle> obtuseTriangles2 = new List<Triangle>(obtuseTriangles);
-
-            //    t.pen = new Pen(Color.Yellow);
-            //    foreach (Triangle t2 in obtuseTriangles)
-            //    {
-            //        count++;
-            //        Trace.WriteLine(count);
-            //        intersection(t, t2);
-            //    }
-            //}
-
+            
             foreach (Triangle t in obtuseTriangles)
             {
                 //Draw points
@@ -508,26 +520,28 @@ namespace WindowsFormsApp2
 
             foreach (Triangle t in obtuseTriangles)
             {
-                
+                if (t.crossed)
+                {
 
-                    if (t.crossed)
-                    {
+                    crossed.Add(t);
+                }
+                else
+                {
+                    NOTcrossed.Add(t);
+                }
 
-                        crossed.Add(t);
-                    }
-                    else
-                    {
-                        NOTcrossed.Add(t);
-                    }
-
-                
             }
+
 
             writeCrossedTriangelstoFile();
             writeNotCrossedTriangelsToFILE();
+            foreach (var item in noDupes)
+            {
+                Trace.WriteLine(item.X +" "+item.Y);
+            }
+           
             Trace.WriteLine("END program");
         }
 
-       
     }
 }
